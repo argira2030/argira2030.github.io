@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argira Station — Hacia la Luz</title>
+<meta name="description" content="Argira Station — Herramientas éticas, accesibles y gratuitas. Sonificación, accesibilidad, protección digital. Jose Ranero García.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04040a;
+    --gold: #f5c842;
+    --gold2: #e8a800;
+    --text: #e8e8f0;
+    --muted: #9a9ab8;
+    --border: #111122;
+    --surface: #090912;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Stars background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(2px 2px at 75% 85%, rgba(245,200,66,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 25% 15%, rgba(245,200,66,0.2) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 80px 20px 60px;
+  }
+
+  .signal {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .logo-wrap {
+    display: inline-block;
+    position: relative;
+    margin-bottom: 20px;
+    width: 200px;
+    height: 140px;
+  }
+
+  /* El Sol: SVG propio, se desplaza en un arco por encima del logo */
+  #sun {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: 0;
+    left: 0;
+    transition: opacity 0.6s ease;
+    will-change: left, top, opacity;
+    pointer-events: none;
+  }
+
+  /* Tallo: fijo, nunca rota ni se mueve */
+  #stem {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4rem;
+    height: 4rem;
+    margin-top: -2rem;
+    margin-left: -2rem;
+    pointer-events: none;
+  }
+
+  /* Cabeza del girasol: unica capa animada (rotacion + flotacion) */
+  #flower-head {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4rem;
+    height: 4rem;
+    margin-top: -2rem;
+    margin-left: -2rem;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 16px rgba(245,200,66,0.35));
+    will-change: transform;
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+  }
+
+  /* Brillo permanente y suave: el disco nunca queda plano */
+  #centerGlowSoft {
+    opacity: 1;
+  }
+
+  /* Brillo calido: aumenta cuando el girasol mira al Sol */
+  #centerGlow {
+    transition: opacity 1.4s ease;
+    opacity: 0;
+  }
+
+  .logo-wrap.sun-near #centerGlow {
+    opacity: 0.85;
+  }
+
+  /* Momento magico: cenit alcanzado, el brillo sube un poco mas y todo se detiene un instante */
+  .logo-wrap.sun-zenith #centerGlow {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+
+  /* Vibracion casi imperceptible de los petalos */
+  #petals {
+    animation: petal-tremble 6s ease-in-out infinite;
+    transform-origin: 100px 100px;
+  }
+
+  @keyframes petal-tremble {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25%      { transform: scale(1.004) rotate(-0.3deg); }
+    50%      { transform: scale(0.998) rotate(0.2deg); }
+    75%      { transform: scale(1.003) rotate(0.15deg); }
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Estrellas nocturnas: aparecen muy tenues cuando el Sol se pone */
+  .night-star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff3c4;
+    opacity: 0;
+    transition: opacity 2.5s ease;
+    pointer-events: none;
+  }
+
+  .logo-wrap.is-night .night-star {
+    opacity: var(--star-opacity, 0.5);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #flower-head { animation: none !important; }
+    #sun { transition: none !important; }
+    #centerGlow { transition: none !important; }
+    #petals { animation: none !important; }
+    .night-star { transition: none !important; }
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--gold);
+    position: relative;
+  }
+
+  h1 em::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: #9a9ab8;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #b0b0cc;
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .signal-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 0 auto 60px;
+    opacity: 0.5;
+  }
+
+  /* Main content */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* Secciones */
+  .section {
+    margin-bottom: 64px;
+  }
+
+  .section h2 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: inline-block;
+  }
+
+  /* Grid de tarjetas */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .card:hover {
+    border-color: rgba(245,200,66,0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(245,200,66,0.05);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-icon { font-size: 1.8rem; }
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .card-desc {
+    font-size: 0.85rem;
+    color: #c8c8e0;
+    line-height: 1.5;
+    font-family: 'DM Mono', monospace;
+    flex: 1;
+  }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    color: #f5c842;
+    border: 1px solid rgba(245,200,66,0.35);
+    border-radius: 99px;
+    padding: 3px 10px;
+    width: fit-content;
+  }
+
+  .card-tag::before { content: '●'; font-size: 0.5rem; }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #9a9ab8;
+    line-height: 2;
+  }
+
+  footer a { color: var(--gold); text-decoration: none; }
+
+  .peace {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    margin-top: 16px;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" style="position:absolute;left:-9999px;top:0;background:#f5c842;color:#0a0a0f;padding:8px 16px;font-weight:700;border-radius:0 0 8px 8px;z-index:9999;" onfocus="this.style.left='0'">Saltar al contenido principal · Skip to main content</a>
+
+<header>
+  <p class="signal" aria-label="Bienvenido a Argira Station, Bilbao">⚡ SIGNAL DETECTED · ARGIRA STATION · BILBAO</p>
+  <div class="logo-wrap" id="logoWrap">
+    <span class="night-star" style="width:2px;height:2px;top:6%;left:12%;--star-opacity:0.45;" aria-hidden="true"></span>
+    <span class="night-star" style="width:2px;height:2px;top:14%;left:82%;--star-opacity:0.35;" aria-hidden="true"></span>
+    <span class="night-star" style="width:1.5px;height:1.5px;top:2%;left:50%;--star-opacity:0.4;" aria-hidden="true"></span>
+    <svg id="sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" aria-hidden="true">
+  <defs>
+    <radialGradient id="sunHalo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff3c4" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#f5c842" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#f5c842" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunCore" cx="42%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#fff6d9"/>
+      <stop offset="100%" stop-color="#f5c842"/>
+    </radialGradient>
+  </defs>
+  <circle cx="20" cy="20" r="19" fill="url(#sunHalo)"/>
+  <circle cx="20" cy="20" r="7.5" fill="url(#sunCore)"/>
+</svg>
+    <svg id="stem" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+  <path d="M 100 130 C 98 155, 98 175, 100 196" stroke="#3f7d3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 100 150 C 88 148, 78 154, 70 164 C 82 166, 92 162, 100 154 Z" fill="#4a8f45"/>
+  <path d="M 101 168 C 113 165, 123 170, 130 180 C 118 183, 108 179, 101 172 Z" fill="#437d3f"/>
+</svg>
+    <svg id="flower-head" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Girasol orientandose hacia la luz del sol">
+  <defs>
+    <radialGradient id="diskGrad" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#7a4d2e"/>
+      <stop offset="55%" stop-color="#4a2c18"/>
+      <stop offset="100%" stop-color="#3a2110"/>
+    </radialGradient>
+    <radialGradient id="seedGrad" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#8a5a34"/>
+      <stop offset="100%" stop-color="#2e1a0d"/>
+    </radialGradient>
+    <radialGradient id="glowGradSoft" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffdd8a" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#ffdd8a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowGradSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff3c4" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff3c4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Brillo permanente y muy suave: el disco nunca queda plano -->
+  <circle id="centerGlowSoft" cx="100" cy="100" r="40" fill="url(#glowGradSoft)"/>
+
+  <!-- Petalos con variacion natural: longitud +-5%, tono alterno, curvatura -->
+  <g id="petals">
+  <path class="petal" d="M 123.74 96.47 Q 142.63 96.75 159.83 100.55 Q 142.63 103.25 123.80 103.09 Z" fill="#fdcc5f"/>
+<path class="petal" d="M 123.50 104.88 Q 140.96 111.20 155.81 119.93 Q 138.81 117.24 121.29 111.07 Z" fill="#f3ad39"/>
+<path class="petal" d="M 120.83 111.91 Q 135.48 123.51 146.74 136.76 Q 130.95 129.23 116.17 117.74 Z" fill="#ffd064"/>
+<path class="petal" d="M 115.24 118.54 Q 124.75 136.70 129.18 155.60 Q 118.38 140.27 109.08 122.22 Z" fill="#f3ad38"/>
+<path class="petal" d="M 106.93 122.98 Q 108.70 141.52 106.25 158.86 Q 102.07 142.38 100.15 124.00 Z" fill="#ffd064"/>
+<path class="petal" d="M 99.67 124.00 Q 95.84 143.05 88.33 159.68 Q 89.25 141.90 93.02 122.96 Z" fill="#f4af3a"/>
+<path class="petal" d="M 90.81 122.17 Q 80.79 138.98 68.70 152.60 Q 75.12 135.63 85.12 118.83 Z" fill="#ffd065"/>
+<path class="petal" d="M 84.30 118.15 Q 68.95 131.78 52.65 141.73 Q 64.33 126.49 79.79 112.94 Z" fill="#f4af3a"/>
+<path class="petal" d="M 78.99 111.60 Q 60.49 117.54 42.24 118.86 Q 58.11 110.67 76.47 104.73 Z" fill="#fecf63"/>
+<path class="petal" d="M 76.27 103.58 Q 56.13 102.54 37.92 96.91 Q 56.33 95.12 76.30 96.23 Z" fill="#f3ac37"/>
+<path class="petal" d="M 76.58 94.77 Q 59.06 88.04 44.28 78.76 Q 61.67 81.29 79.28 87.89 Z" fill="#ffcf64"/>
+<path class="petal" d="M 79.45 87.60 Q 65.56 75.27 55.46 61.09 Q 70.24 69.79 84.20 81.93 Z" fill="#f4af3a"/>
+<path class="petal" d="M 85.39 80.96 Q 76.47 63.68 71.90 46.03 Q 82.78 60.30 91.70 77.48 Z" fill="#fdcb5f"/>
+<path class="petal" d="M 92.35 77.25 Q 89.72 56.26 92.17 36.37 Q 96.93 55.17 99.30 76.01 Z" fill="#f4b03b"/>
+<path class="petal" d="M 99.80 76.00 Q 103.22 55.62 110.67 37.66 Q 110.95 56.87 107.36 77.16 Z" fill="#fcc95c"/>
+<path class="petal" d="M 108.80 77.67 Q 118.81 60.78 131.14 47.21 Q 124.49 64.05 114.51 80.88 Z" fill="#f4ae39"/>
+<path class="petal" d="M 115.47 81.65 Q 128.86 68.60 142.83 58.52 Q 133.76 73.94 120.32 87.24 Z" fill="#ffd064"/>
+<path class="petal" d="M 121.05 88.48 Q 139.81 82.43 158.27 80.89 Q 142.01 88.67 123.40 94.67 Z" fill="#f3ad39"/>
+  </g>
+
+  <circle cx="100" cy="100" r="26" fill="url(#diskGrad)"/>
+
+  <!-- Semillas: espiral de Vogel real (theta=137.508deg, r=c*sqrt(n)), 144 semillas -->
+  <g id="seeds">
+  <circle cx="98.43" cy="101.43" r="0.95" fill="url(#seedGrad)"/>
+<circle cx="100.26" cy="97.01" r="0.96" fill="url(#seedGrad)"/>
+<circle cx="102.24" cy="102.92" r="0.96" fill="url(#seedGrad)"/>
+<circle cx="95.82" cy="99.26" r="0.97" fill="url(#seedGrad)"/>
+<circle cx="104.01" cy="97.45" r="0.97" fill="url(#seedGrad)"/>
+<circle cx="98.65" cy="105.02" r="0.98" fill="url(#seedGrad)"/>
+<circle cx="97.41" cy="95.01" r="0.98" fill="url(#seedGrad)"/>
+<circle cx="105.64" cy="102.06" r="0.99" fill="url(#seedGrad)"/>
+<circle cx="94.11" cy="102.43" r="0.99" fill="url(#seedGrad)"/>
+<circle cx="102.85" cy="93.92" r="1.00" fill="url(#seedGrad)"/>
+<circle cx="102.11" cy="106.72" r="1.00" fill="url(#seedGrad)"/>
+<circle cx="93.64" cy="96.31" r="1.00" fill="url(#seedGrad)"/>
+<circle cx="107.48" cy="98.36" r="1.01" fill="url(#seedGrad)"/>
+<circle cx="95.43" cy="106.50" r="1.01" fill="url(#seedGrad)"/>
+<circle cx="98.94" cy="91.84" r="1.02" fill="url(#seedGrad)"/>
+<circle cx="106.49" cy="105.47" r="1.02" fill="url(#seedGrad)"/>
+<circle cx="91.25" cy="100.36" r="1.03" fill="url(#seedGrad)"/>
+<circle cx="106.39" cy="93.65" r="1.03" fill="url(#seedGrad)"/>
+<circle cx="99.57" cy="109.25" r="1.04" fill="url(#seedGrad)"/>
+<circle cx="93.92" cy="92.71" r="1.04" fill="url(#seedGrad)"/>
+<circle cx="109.64" cy="101.30" r="1.04" fill="url(#seedGrad)"/>
+<circle cx="91.82" cy="105.69" r="1.05" fill="url(#seedGrad)"/>
+<circle cx="102.24" cy="90.07" r="1.05" fill="url(#seedGrad)"/>
+<circle cx="105.17" cy="109.03" r="1.06" fill="url(#seedGrad)"/>
+<circle cx="89.89" cy="96.77" r="1.06" fill="url(#seedGrad)"/>
+<circle cx="109.83" cy="95.46" r="1.07" fill="url(#seedGrad)"/>
+<circle cx="95.74" cy="110.18" r="1.07" fill="url(#seedGrad)"/>
+<circle cx="96.20" cy="89.43" r="1.08" fill="url(#seedGrad)"/>
+<circle cx="110.12" cy="105.32" r="1.08" fill="url(#seedGrad)"/>
+<circle cx="88.75" cy="102.96" r="1.09" fill="url(#seedGrad)"/>
+<circle cx="106.40" cy="90.06" r="1.09" fill="url(#seedGrad)"/>
+<circle cx="102.03" cy="111.84" r="1.09" fill="url(#seedGrad)"/>
+<circle cx="90.36" cy="92.53" r="1.10" fill="url(#seedGrad)"/>
+<circle cx="112.34" cy="98.98" r="1.10" fill="url(#seedGrad)"/>
+<circle cx="91.47" cy="109.22" r="1.11" fill="url(#seedGrad)"/>
+<circle cx="100.06" cy="87.26" r="1.11" fill="url(#seedGrad)"/>
+<circle cx="108.68" cy="109.57" r="1.12" fill="url(#seedGrad)"/>
+<circle cx="86.97" cy="98.79" r="1.12" fill="url(#seedGrad)"/>
+<circle cx="110.56" cy="91.99" r="1.13" fill="url(#seedGrad)"/>
+<circle cx="97.59" cy="113.21" r="1.13" fill="url(#seedGrad)"/>
+<circle cx="92.76" cy="88.49" r="1.14" fill="url(#seedGrad)"/>
+<circle cx="113.27" cy="103.64" r="1.14" fill="url(#seedGrad)"/>
+<circle cx="87.61" cy="106.35" r="1.14" fill="url(#seedGrad)"/>
+<circle cx="104.90" cy="86.79" r="1.15" fill="url(#seedGrad)"/>
+<circle cx="105.37" cy="113.19" r="1.15" fill="url(#seedGrad)"/>
+<circle cx="86.99" cy="93.83" r="1.16" fill="url(#seedGrad)"/>
+<circle cx="113.91" cy="95.71" r="1.16" fill="url(#seedGrad)"/>
+<circle cx="92.56" cy="112.69" r="1.17" fill="url(#seedGrad)"/>
+<circle cx="96.88" cy="85.47" r="1.17" fill="url(#seedGrad)"/>
+<circle cx="112.24" cy="108.70" r="1.18" fill="url(#seedGrad)"/>
+<circle cx="84.95" cy="101.87" r="1.18" fill="url(#seedGrad)"/>
+<circle cx="109.93" cy="88.34" r="1.18" fill="url(#seedGrad)"/>
+<circle cx="100.56" cy="115.45" r="1.19" fill="url(#seedGrad)"/>
+<circle cx="89.05" cy="88.88" r="1.19" fill="url(#seedGrad)"/>
+<circle cx="115.73" cy="100.81" r="1.20" fill="url(#seedGrad)"/>
+<circle cx="87.75" cy="110.12" r="1.20" fill="url(#seedGrad)"/>
+<circle cx="102.22" cy="84.12" r="1.21" fill="url(#seedGrad)"/>
+<circle cx="109.17" cy="113.32" r="1.21" fill="url(#seedGrad)"/>
+<circle cx="84.11" cy="96.34" r="1.22" fill="url(#seedGrad)"/>
+<circle cx="114.31" cy="91.90" r="1.22" fill="url(#seedGrad)"/>
+<circle cx="94.88" cy="115.77" r="1.23" fill="url(#seedGrad)"/>
+<circle cx="93.07" cy="84.79" r="1.23" fill="url(#seedGrad)"/>
+<circle cx="115.51" cy="106.59" r="1.23" fill="url(#seedGrad)"/>
+<circle cx="83.99" cy="105.67" r="1.24" fill="url(#seedGrad)"/>
+<circle cx="108.04" cy="84.89" r="1.24" fill="url(#seedGrad)"/>
+<circle cx="104.31" cy="116.70" r="1.25" fill="url(#seedGrad)"/>
+<circle cx="85.43" cy="90.52" r="1.25" fill="url(#seedGrad)"/>
+<circle cx="117.27" cy="97.12" r="1.26" fill="url(#seedGrad)"/>
+<circle cx="89.13" cy="113.89" r="1.26" fill="url(#seedGrad)"/>
+<circle cx="98.62" cy="82.29" r="1.27" fill="url(#seedGrad)"/>
+<circle cx="113.07" cy="112.22" r="1.27" fill="url(#seedGrad)"/>
+<circle cx="81.98" cy="99.82" r="1.27" fill="url(#seedGrad)"/>
+<circle cx="113.50" cy="87.88" r="1.28" fill="url(#seedGrad)"/>
+<circle cx="98.22" cy="118.18" r="1.28" fill="url(#seedGrad)"/>
+<circle cx="88.96" cy="85.29" r="1.29" fill="url(#seedGrad)"/>
+<circle cx="118.19" cy="103.41" r="1.29" fill="url(#seedGrad)"/>
+<circle cx="84.18" cy="109.84" r="1.30" fill="url(#seedGrad)"/>
+<circle cx="105.05" cy="81.94" r="1.30" fill="url(#seedGrad)"/>
+<circle cx="108.53" cy="116.84" r="1.31" fill="url(#seedGrad)"/>
+<circle cx="82.23" cy="93.31" r="1.31" fill="url(#seedGrad)"/>
+<circle cx="117.74" cy="92.89" r="1.32" fill="url(#seedGrad)"/>
+<circle cx="91.68" cy="117.33" r="1.32" fill="url(#seedGrad)"/>
+<circle cx="94.40" cy="81.48" r="1.32" fill="url(#seedGrad)"/>
+<circle cx="116.74" cy="109.93" r="1.33" fill="url(#seedGrad)"/>
+<circle cx="80.84" cy="104.01" r="1.33" fill="url(#seedGrad)"/>
+<circle cx="111.49" cy="84.01" r="1.34" fill="url(#seedGrad)"/>
+<circle cx="102.35" cy="119.67" r="1.34" fill="url(#seedGrad)"/>
+<circle cx="84.90" cy="87.01" r="1.35" fill="url(#seedGrad)"/>
+<circle cx="120.02" cy="99.37" r="1.35" fill="url(#seedGrad)"/>
+<circle cx="85.58" cy="114.06" r="1.36" fill="url(#seedGrad)"/>
+<circle cx="101.14" cy="79.78" r="1.36" fill="url(#seedGrad)"/>
+<circle cx="112.89" cy="115.77" r="1.37" fill="url(#seedGrad)"/>
+<circle cx="79.73" cy="97.06" r="1.37" fill="url(#seedGrad)"/>
+<circle cx="117.02" cy="88.41" r="1.37" fill="url(#seedGrad)"/>
+<circle cx="95.25" cy="120.14" r="1.38" fill="url(#seedGrad)"/>
+<circle cx="89.84" cy="81.85" r="1.38" fill="url(#seedGrad)"/>
+<circle cx="119.86" cy="106.56" r="1.39" fill="url(#seedGrad)"/>
+<circle cx="80.83" cy="108.62" r="1.39" fill="url(#seedGrad)"/>
+<circle cx="108.35" cy="80.59" r="1.40" fill="url(#seedGrad)"/>
+<circle cx="106.98" cy="120.05" r="1.40" fill="url(#seedGrad)"/>
+<circle cx="81.21" cy="89.88" r="1.41" fill="url(#seedGrad)"/>
+<circle cx="120.79" cy="94.75" r="1.41" fill="url(#seedGrad)"/>
+<circle cx="88.16" cy="118.01" r="1.41" fill="url(#seedGrad)"/>
+<circle cx="96.55" cy="78.62" r="1.42" fill="url(#seedGrad)"/>
+<circle cx="117.07" cy="113.50" r="1.42" fill="url(#seedGrad)"/>
+<circle cx="78.20" cy="101.58" r="1.43" fill="url(#seedGrad)"/>
+<circle cx="115.08" cy="84.03" r="1.43" fill="url(#seedGrad)"/>
+<circle cx="99.67" cy="122.06" r="1.44" fill="url(#seedGrad)"/>
+<circle cx="85.27" cy="83.43" r="1.44" fill="url(#seedGrad)"/>
+<circle cx="122.15" cy="102.28" r="1.45" fill="url(#seedGrad)"/>
+<circle cx="82.04" cy="113.34" r="1.45" fill="url(#seedGrad)"/>
+<circle cx="104.25" cy="77.93" r="1.46" fill="url(#seedGrad)"/>
+<circle cx="111.83" cy="119.23" r="1.46" fill="url(#seedGrad)"/>
+<circle cx="78.20" cy="93.78" r="1.46" fill="url(#seedGrad)"/>
+<circle cx="120.36" cy="89.81" r="1.47" fill="url(#seedGrad)"/>
+<circle cx="91.83" cy="121.36" r="1.47" fill="url(#seedGrad)"/>
+<circle cx="91.56" cy="78.64" r="1.48" fill="url(#seedGrad)"/>
+<circle cx="120.74" cy="110.09" r="1.48" fill="url(#seedGrad)"/>
+<circle cx="77.80" cy="106.60" r="1.49" fill="url(#seedGrad)"/>
+<circle cx="111.97" cy="80.05" r="1.49" fill="url(#seedGrad)"/>
+<circle cx="104.67" cy="122.89" r="1.50" fill="url(#seedGrad)"/>
+<circle cx="81.02" cy="86.22" r="1.50" fill="url(#seedGrad)"/>
+<circle cx="123.40" cy="97.33" r="1.51" fill="url(#seedGrad)"/>
+<circle cx="84.49" cy="117.85" r="1.51" fill="url(#seedGrad)"/>
+<circle cx="99.38" cy="76.27" r="1.51" fill="url(#seedGrad)"/>
+<circle cx="116.55" cy="117.15" r="1.52" fill="url(#seedGrad)"/>
+<circle cx="76.12" cy="98.53" r="1.52" fill="url(#seedGrad)"/>
+<circle cx="118.68" cy="84.89" r="1.53" fill="url(#seedGrad)"/>
+<circle cx="96.42" cy="123.85" r="1.53" fill="url(#seedGrad)"/>
+<circle cx="86.48" cy="79.92" r="1.54" fill="url(#seedGrad)"/>
+<circle cx="123.63" cy="105.69" r="1.54" fill="url(#seedGrad)"/>
+<circle cx="78.65" cy="111.81" r="1.55" fill="url(#seedGrad)"/>
+<circle cx="107.80" cy="76.79" r="1.55" fill="url(#seedGrad)"/>
+<circle cx="109.97" cy="122.47" r="1.55" fill="url(#seedGrad)"/>
+<circle cx="77.39" cy="90.13" r="1.56" fill="url(#seedGrad)"/>
+<circle cx="123.43" cy="91.97" r="1.56" fill="url(#seedGrad)"/>
+<circle cx="88.10" cy="121.82" r="1.57" fill="url(#seedGrad)"/>
+<circle cx="94.01" cy="75.79" r="1.57" fill="url(#seedGrad)"/>
+<circle cx="120.85" cy="113.86" r="1.58" fill="url(#seedGrad)"/>
+<circle cx="75.18" cy="103.88" r="1.58" fill="url(#seedGrad)"/>
+<circle cx="115.74" cy="80.30" r="1.59" fill="url(#seedGrad)"/>
+<circle cx="101.71" cy="125.24" r="1.59" fill="url(#seedGrad)"/>
+<circle cx="81.63" cy="82.48" r="1.60" fill="url(#seedGrad)"/>
+<circle cx="125.47" cy="100.51" r="1.60" fill="url(#seedGrad)"/>
+  </g>
+
+  <circle cx="100" cy="100" r="26" fill="none" stroke="#2a1608" stroke-width="1" opacity="0.5"/>
+
+  <!-- Brillo calido que se intensifica cuando el Sol esta cerca -->
+  <circle id="centerGlow" cx="100" cy="100" r="46" fill="url(#glowGradSun)" opacity="0"/>
+</svg>
+  </div>
+  <h1>Argira <em>Station</em></h1>
+  <p class="tagline">HACIA LA LUZ · ARGIRANTZ · TOWARD THE LIGHT</p>
+  <p class="subtitle">Herramientas éticas, accesibles y gratuitas.<br>Sonificación · Protección digital · Cognición · Paz.</p>
+  <div class="signal-line" aria-hidden="true"></div>
+</header>
+
+<main id="main-content" role="main" aria-label="Herramientas de Argira Station organizadas por áreas: sonificación, protección digital y cognitivo">
+
+  <!-- SECCIÓN SONIFICACIÓN -->
+  <div class="section">
+    <h2 id="sonificacion-heading">🎵 Sonificación · Sonification</h2>
+    <div class="grid" aria-labelledby="sonificacion-heading">
+      
+      <a href="https://argira.eus/argira-sonification/" class="card" aria-label="Argira Museo Sonoro: 16 pinturas convertidas en sonido. Accesible para personas ciegas. Correlación r=0.9289, presentado en ICAD 2026 Barcelona.">
+        <span class="card-icon" aria-hidden="true">🎨</span>
+        <div class="card-title">Argira · Museo Sonoro</div>
+        <p class="card-desc">16 pinturas convertidas en sonido. Del silencio de Malevich al caos de Kandinsky. Test auditivo interactivo. Accesible para personas ciegas.</p>
+        <span class="card-tag">ICAD 2026 · r=0.9289 · CC BY-NC</span>
+      </a>
+
+      <a href="https://argira2030.github.io/argira-inversa/" class="card" aria-label="Argira Inversa: cimática digital, convierte frecuencias de sonido en patrones visuales geométricos con proporción áurea.">
+        <span class="card-icon" aria-hidden="true">🌀</span>
+        <div class="card-title">Argira Inversa · Cymática</div>
+        <p class="card-desc">Cymática digital. Convierte sonido en geometría visual. Patrones Chladni, Lissajous, Espiral φ.</p>
+        <span class="card-tag">Cymática · MIT</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- SECCIÓN PROTECCIÓN DIGITAL -->
+  <div class="section">
+    <h2 id="proteccion-heading">🛡️ Protección digital · Digital Protection</h2>
+    <div class="grid" aria-labelledby="proteccion-heading">
+      
+      <a href="https://argira2030.github.io/argira-shield/" class="card" aria-label="Argira Shield: suite de protección digital con 5 módulos: detector de desinformación, analizador de permisos, huella digital, validador de código y metadatos. Gratuito y offline.">
+        <span class="card-icon" aria-hidden="true">🛡️</span>
+        <div class="card-title">Argira Shield</div>
+        <p class="card-desc">Suite de protección digital. Verifica., PermisoClaro, Huella Digital, Validador de Código, Metadatos.</p>
+        <span class="card-tag">Protección · MIT</span>
+      </a>
+
+      <a href="https://argira2030.github.io/argira-verifica/" class="card" aria-label="Verifica.: detector de desinformación offline con 156 patrones lingüísticos. No requiere instalación ni cuenta.">
+        <span class="card-icon" aria-hidden="true">🔍</span>
+        <div class="card-title">Verifica.</div>
+        <p class="card-desc">Detector de desinformación offline. 156 patrones en 10 categorías. Sin instalación, sin cuenta.</p>
+        <span class="card-tag">Media literacy · MIT</span>
+      </a>
+
+      <a href="https://argira2030.github.io/leeclaro/" class="card" aria-label="LeeClaro: analiza condiciones de uso y contratos. Detecta cobros ocultos, cesiones de datos y cláusulas abusivas. Gratuito y offline.">
+        <span class="card-icon" aria-hidden="true">📋</span>
+        <div class="card-title">LeeClaro</div>
+        <p class="card-desc">Analiza condiciones de uso y contratos. Detecta cobros ocultos, cesiones de datos y cláusulas abusivas.</p>
+        <span class="card-tag">Transparencia · MIT</span>
+      </a>
+
+      <a href="https://argira2030.github.io/permisoclaro/" class="card" aria-label="PermisoClaro: analiza permisos de aplicaciones Android. Puntuación de confianza de 0 a 100. Detecta permisos sospechosos. Bilingüe español e inglés.">
+        <span class="card-icon" aria-hidden="true">🔐</span>
+        <div class="card-title">PermisoClaro</div>
+        <p class="card-desc">Analiza permisos de apps Android. Trust Score 0-100. Detecta permisos sospechosos. Bilingüe ES/EN.</p>
+        <span class="card-tag">Privacidad · MIT</span>
+      </a>
+
+      <a href="https://argira.eus/argira-integrity/" class="card" aria-label="Argira Integrity: verificador de integridad de archivos SHA-256 y MD5. Sin servidor, sin datos enviados.">
+        <span class="card-icon" aria-hidden="true">🔒</span>
+        <div class="card-title">Argira Integrity</div>
+        <p class="card-desc">Verificador de integridad de archivos. SHA-256, MD5. Todo ocurre en tu dispositivo — sin servidor, sin datos enviados.</p>
+        <span class="card-tag">Integridad · MIT</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- SECCIÓN COGNITIVO (Neurociencia + Fractales) -->
+  <div class="section">
+    <h2 id="cognitivo-heading">🧠 Cognitivo · Neuroscience & Cognition</h2>
+    <div class="grid" aria-labelledby="cognitivo-heading">
+      
+      <a href="https://argira.eus/stroop-attention/" class="card" aria-label="Argira Cognitive Lab: batería de 16 tareas cognitivas validadas científicamente: Stroop, Flanker, N-back, WCST, Iowa Gambling y más. Código abierto MIT, sin tracking.">
+        <span class="card-icon" aria-hidden="true">🧪</span>
+        <div class="card-title">Argira Cognitive Lab</div>
+        <p class="card-desc">Batería de 16 tareas cognitivas validadas científicamente. Stroop, Flanker, Simon, N-back, ANT, Posner, Task Switch, WCST, Iowa Gambling y más. Código abierto, sin tracking.</p>
+        <span class="card-tag">Neurociencia · MIT · 16 tareas</span>
+      </a>
+
+      <a href="https://argira.eus/protocolo-atencion/" class="card" aria-label="Protocolo de Intervención Digital para la Recuperación de la Atención: basado en neurociencia con 4 fases, fórmula R = (F × C) − (E × V), preguntas interactivas y calendario de 30 días. Gratuito, offline y con DOI.">
+        <span class="card-icon" aria-hidden="true">🧠</span>
+        <div class="card-title">Protocolo Atención</div>
+        <p class="card-desc">Recupera el control de tu atención. Neurociencia aplicada: fricción, dopamina, veto consciente, métrica. Calendario 30 días.</p>
+        <span class="card-tag">Neurociencia · CC BY 4.0 · DOI</span>
+      </a>
+
+      <a href="https://argira2030.github.io/argira-fractal/" class="card" aria-label="Argira Fractal Beta: test perceptual de ruido fractal. Estímulos de beta 0 a 2. Análisis de preferencia auditiva.">
+        <span class="card-icon" aria-hidden="true">📐</span>
+        <div class="card-title">Argira Fractal Beta</div>
+        <p class="card-desc">Test perceptual de ruido fractal β. Estímulos β=0 a 2.0. Análisis de preferencia auditiva.</p>
+        <span class="card-tag">Fractal · MIT</span>
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer role="contentinfo" aria-label="Información del sitio y soporte">
+  <div style="margin-bottom:24px;text-align:center;">
+    <a href="https://ko-fi.com/argira" target="_blank" rel="noopener"
+      style="display:inline-block;padding:11px 26px;background:transparent;color:#e8e8f0;border:1px solid #3a3a5a;border-radius:10px;font-family:'DM Mono',monospace;font-weight:500;font-size:0.82rem;text-decoration:none;"
+      aria-label="Apoya Argira Station con una donación voluntaria en Ko-fi. Abre Ko-fi, elige cantidad y paga con PayPal o tarjeta.">
+      ☕ Apoya Argira Station 🌻
+    </a>
+    <p style="font-size:0.72rem;color:#9a9ab8;font-family:'DM Mono',monospace;margin-top:8px;line-height:1.6;">
+      Donación voluntaria · Ko-fi<br>
+      Pulsa el botón azul → "Donate" → elige cantidad → paga con PayPal o tarjeta<br>
+      Click the blue button → "Donate" → choose amount → pay with PayPal or card<br>
+      Gracias · Thank you · Herramientas gratuitas para todos 🌻
+    </p>
+  </div>
+  <p>
+    Argira Station · Jose Ranero García · Bilbao · 2026<br>
+    ORCID: <a href="https://orcid.org/0009-0009-3168-6379" target="_blank">0009-0009-3168-6379</a> ·
+    <a href="https://zenodo.org/search?q=argira" target="_blank">Zenodo</a> ·
+    <a href="https://ko-fi.com/argira" target="_blank">Ko-fi</a>
+  </p>
+  <p style="margin-top:8px;">
+    Herramientas gratuitas · Offline · Sin tracking · Sin publicidad<br>
+    CC BY-NC 4.0 (Argira) · MIT (herramientas)
+  </p>
+  <p class="peace">🕊️ PAZ · PEACE · 平和 · السلام · Мир · শান্তি</p>
+</footer>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var sun = document.getElementById('sun');
+  var wrap = document.getElementById('logoWrap');
+  var head = document.getElementById('flower-head'); // unica capa que rota; tallo y hojas permanecen fijos
+  if (!sun || !wrap || !head) return;
+
+  if (reduceMotion) {
+    // Estado estatico y calmado: sol fijo abajo-izquierda, girasol centrado, sin movimiento.
+    sun.style.left = '4px';
+    sun.style.top = '78px';
+    sun.style.opacity = '0.6';
+    return;
+  }
+
+  var CYCLE_MS = 22000;    // duracion del arco completo ("dia" del sol)
+  var PAUSE_MS = 4000;     // pausa bajo el horizonte antes del siguiente ciclo
+  var MAX_TILT = 12;       // grados, inclinacion maxima de la cabeza
+  var LERP = 0.05;         // factor de suavizado del seguimiento
+
+  var ZENITH_START = 0.46; // fraccion del arco donde comienza el "momento magico"
+  var ZENITH_END = 0.54;   // y donde termina (la cabeza se detiene en este tramo)
+
+  var w = 200, h = 140;    // dimensiones del logo-wrap (px), igual que en CSS
+  var currentTilt = 0;
+  var targetTilt = 0;
+  var startTime = performance.now();
+  var wasZenith = false;
+
+  sun.style.left = '-20px';
+  sun.style.top = h + 'px';
+  sun.style.opacity = '0';
+
+  function frame(now) {
+    var elapsed = (now - startTime) % (CYCLE_MS + PAUSE_MS);
+
+    if (elapsed <= CYCLE_MS) {
+      // t va de 0 a 1 a lo largo del arco (horizonte izquierdo a derecho)
+      var t = elapsed / CYCLE_MS;
+      var angle = Math.PI * t; // 0 a PI, solo hemisferio superior
+      var x = (1 - Math.cos(angle)) / 2 * w; // 0 -> w
+      var y = h - Math.sin(angle) * h * 0.95; // arco ascendente, cerca del horizonte en los extremos
+
+      sun.style.left = (x - 20) + 'px';
+      sun.style.top = (y - 20) + 'px';
+      sun.style.opacity = String(0.35 + 0.65 * Math.sin(angle));
+
+      var inZenith = t > ZENITH_START && t < ZENITH_END;
+
+      if (inZenith) {
+        // Momento magico: el girasol "encuentra" la luz y se queda quieto un instante,
+        // mientras el brillo central aumenta lentamente.
+        wrap.classList.add('sun-zenith');
+      } else {
+        wrap.classList.remove('sun-zenith');
+      }
+
+      if (!inZenith) {
+        var offset = (x - w / 2) / (w / 2); // -1 (izq) a 1 (der)
+        targetTilt = offset * MAX_TILT;
+      }
+      // durante el cenit, targetTilt no se actualiza -> la cabeza permanece quieta
+
+      var near = Math.sin(angle) > 0.6; // sol cerca del cenit/girasol
+      wrap.classList.toggle('sun-near', near);
+      wrap.classList.remove('is-night');
+    } else {
+      // Bajo el horizonte: sol oculto, el girasol vuelve lentamente al centro
+      sun.style.opacity = '0';
+      targetTilt = 0;
+      wrap.classList.remove('sun-near');
+      wrap.classList.remove('sun-zenith');
+      wrap.classList.add('is-night');
+    }
+
+    currentTilt += (targetTilt - currentTilt) * LERP;
+
+    // Rota solo la cabeza del girasol sobre su propio centro (100,100 en el viewBox)
+    head.style.transform = 'rotate(' + currentTilt.toFixed(2) + 'deg)';
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
